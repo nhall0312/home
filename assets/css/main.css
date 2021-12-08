@@ -554,6 +554,8 @@ input, select, textarea {
 			font-size: 1.25em;
 			margin: 0.75em 0 0.25em 0;
 			opacity: 0.75;
+			width: 500px
+			text-align: justify;
 		}
 
 		#header nav {
@@ -694,10 +696,6 @@ input, select, textarea {
 						background-color: rgba(255, 255, 255, 0.35);
 						color: #fff;
 					}
-
-				#header nav a span {
-					display: none;
-				}
 
 /* Footer */
 
