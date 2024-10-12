@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emoji my Stata</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+  #inputText {
+    font-size: 18px;
+  }
+  #result {
+    margin-top: 20px;
+    font-size: 18px;
+    white-space: pre-wrap;
+  }
+  </style>
+</head>
+<body class="container my-4">
+
+  <h1 class="text-center">Emoji My Stata</h1>
+  <p class="text-center">All processing is done client side and no data is transmitted. Still, <b>do not</b> paste confidential or work product code!</p>
+  <div class="mb-3">
+    <textarea id="inputText" class="form-control" rows="8" placeholder="Paste Stata code here..."></textarea>
+  </div>
+  <div class="text-center">
+    <button class="btn btn-primary me-2" onclick="translateToEmoji()">Emojify</button>
+    <button class="btn btn-secondary" id="copyBtn" onclick="copyToClipboard()" disabled>Copy</button>
+  </div>
+
+  <div id="result" class="mt-4 bg-light p-3 border rounded"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  const originalEmojiBank = [
+    '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚',
+    '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥',
+    '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '😵', '🤯', '🤠', '😎', '🤓', '🧐', '😕', '😟', '🙁',
+    '📧', '😮', '😯', '😲', '😳', '🥺', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬',
+    '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿',
+    '😾', '🙈', '🙉', '🙊', '💋', '💌', '💘', '💝', '💖', '💗', '💓', '💞', '💕', '💟', '❣️', '💔', '❤️', '🧡', '💛', '💚',
+    '💙', '💜', '🤎', '🖤', '🤍', '💯', '💢', '💥', '💫', '💦', '💨', '🕳️', '👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤏', '✌️',
+    '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏',
+    '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸',
+    '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟',
+    '🦗', '🕷️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈',
+    '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🐘', '🦣', '🐪', '🐫', '🦒', '🦏', '🦛', '🐂', '🐃', '🐄', '🐎', '🐖', '🐏', '🐑',
+    '🐐', '🦌', '🐕', '🐩', '🐈', '🐓', '🦃', '🦚', '🦜', '🦢', '🦩', '🕊️', '🐇', '🐁', '🐀', '🐿️', '🦔', '🐾', '🐉', '🐲',
+    '🌵', '🎄', '🌲', '🌳', '🌴', '🌱', '🌿', '☘️', '🍀', '🎋', '🍃', '🍂', '🍁', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔'
+  ];
+
+
+  function getRandomEmoji(emojiBank) {
+    const randomIndex = Math.floor(Math.random() * emojiBank.length);
+    const selectedEmoji = emojiBank[randomIndex];
+    emojiBank.splice(randomIndex, 1);
+    return selectedEmoji;
+  }
+
+  function isWhitespace(char) {
+    return /\s/.test(char);
+  }
+
+  function translateToEmoji() {
+    let emojiBank = [...originalEmojiBank];
+
+    const inputText = document.getElementById("inputText").value;
+    let translatedText = "";
+    let localMap = "// New and improved\n";
+    const usedEmojis = {};
+
+    for (let char of inputText) {
+      if (isWhitespace(char)) {
+        translatedText += char;
+      } else {
+        if (!usedEmojis[char]) {
+          usedEmojis[char] = getRandomEmoji(emojiBank);
+          localMap += `local ${usedEmojis[char]} \`"${char}"'\n`;
+        }
+        translatedText += "`" + usedEmojis[char] + "'";
+      }
+    }
+
+    document.getElementById("result").innerText = localMap + "\n" + translatedText;
+    const copyBtn = document.getElementById("copyBtn");
+    copyBtn.disabled = false;
+  }
+
+  function copyToClipboard() {
+    const result = document.getElementById("result").innerText;
+    navigator.clipboard.writeText(result).then(function() {
+      alert("Copied to clipboard!");
+    }, function() {
+      alert("Failed to copy.");
+    });
+  }
+
+
+</script>
+
+</body>
+</html>
