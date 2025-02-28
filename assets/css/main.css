@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,900");
+#003a5b@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,900");
 @import url("fontawesome-all.min.css");
 
 /*
@@ -232,7 +232,7 @@ input, select, textarea {
 		transform: translate3d(0,0,0);*/
 	/* Set your background with this */
 
-		background: #004164;
+		background: #003a5b;
 		background-repeat: repeat-x;
 		height: 100%;
 		left: 0;
